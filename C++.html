@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GESP C++三级真题 - 知识点分类汇总</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #f0f2f5; color: #333; line-height: 1.6; }
+
+        /* 顶部导航 */
+        .topbar { background: linear-gradient(135deg, #1a73e8, #4285f4); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 200; }
+        .topbar h1 { font-size: 1.6em; margin-bottom: 8px; }
+        .topbar p { font-size: 0.9em; opacity: 0.9; }
+
+        /* 视图切换 */
+        .view-toggle { display: flex; justify-content: center; gap: 10px; padding: 15px; background: white; border-bottom: 1px solid #e1e4e8; position: sticky; top: 80px; z-index: 150; }
+        .view-toggle button { padding: 8px 24px; border: 2px solid #1a73e8; background: white; color: #1a73e8; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .view-toggle button.active { background: #1a73e8; color: white; }
+        .view-toggle button:hover { background: #e8f0fe; }
+        .view-toggle button.active:hover { background: #1557b0; }
+
+        /* 侧边栏 */
+        .sidebar { position: fixed; left: 0; top: 145px; width: 260px; height: calc(100vh - 145px); background: white; border-right: 1px solid #e1e4e8; overflow-y: auto; z-index: 100; padding: 15px 0; }
+        .sidebar-title { padding: 10px 20px; font-weight: 700; color: #1a73e8; font-size: 1.05em; border-bottom: 2px solid #e8f0fe; margin-bottom: 10px; }
+        .sidebar-group { margin-bottom: 5px; }
+        .sidebar-group-title { padding: 10px 20px; font-weight: 600; color: #444; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .sidebar-group-title:hover { background: #f5f7fa; }
+        .sidebar-group-title::after { content: "▼"; font-size: 0.7em; color: #999; transition: transform 0.3s; }
+        .sidebar-group.collapsed .sidebar-group-title::after { transform: rotate(-90deg); }
+        .sidebar-group.collapsed .sidebar-items { display: none; }
+        .sidebar-item { padding: 8px 20px 8px 35px; cursor: pointer; color: #555; font-size: 0.9em; transition: all 0.2s; border-left: 3px solid transparent; }
+        .sidebar-item:hover { background: #f0f7ff; color: #1a73e8; border-left-color: #4285f4; }
+        .sidebar-item.active { background: #e8f0fe; color: #1a73e8; border-left-color: #1a73e8; font-weight: 600; }
+        .sidebar-item .count { float: right; background: #e8f0fe; color: #1a73e8; padding: 1px 8px; border-radius: 10px; font-size: 0.8em; }
+
+        /* 主内容区 */
+        .main-wrapper { margin-left: 260px; padding: 20px; min-height: calc(100vh - 145px); }
+        .main-wrapper.full-width { margin-left: 0; }
+
+        /* 页面容器 */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* 内容卡片 */
+        .content-card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .content-card h2 { color: #1a73e8; border-bottom: 3px solid #e8f0fe; padding-bottom: 12px; margin-bottom: 20px; font-size: 1.5em; }
+        .content-card h3 { color: #202124; margin: 20px 0 12px 0; font-size: 1.15em; padding-left: 12px; border-left: 4px solid #4285f4; }
+
+        /* 题目样式 */
+        .question { background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 10px; padding: 18px; margin-bottom: 15px; transition: box-shadow 0.3s; }
+        .question:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+        .q-title { font-weight: 700; color: #1a73e8; font-size: 1em; flex: 1; }
+        .q-meta { display: flex; gap: 8px; flex-shrink: 0; }
+        .q-answer { background: #e8f5e9; color: #2e7d32; padding: 3px 12px; border-radius: 15px; font-weight: 700; font-size: 0.85em; border: 1px solid #c8e6c9; }
+        .q-answer.wrong { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+        .q-source { background: #fff3e0; color: #e65100; padding: 3px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 600; }
+        .q-body { color: #444; margin-bottom: 10px; font-size: 0.95em; }
+        .q-body pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; font-family: "Consolas", monospace; font-size: 0.88em; margin: 8px 0; }
+        .q-options { margin: 8px 0 8px 20px; color: #555; }
+        .q-options li { margin-bottom: 4px; }
+        .analysis { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-top: 10px; }
+        .analysis-title { font-weight: 700; color: #1565c0; margin-bottom: 6px; font-size: 0.95em; }
+        .analysis p { color: #444; font-size: 0.92em; }
+
+        /* 答案与解析默认隐藏，点击后显示 */
+        .q-answer { display: none; }
+        .analysis { display: none; }
+        .question.revealed .q-answer { display: inline-block; }
+        .question.revealed .analysis { display: block; }
+
+        /* 查看答案按钮 */
+        .reveal-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 16px; background: linear-gradient(135deg, #1a73e8, #4285f4); color: white; border: none; border-radius: 18px; cursor: pointer; font-size: 0.88em; font-weight: 600; transition: all 0.25s; box-shadow: 0 2px 6px rgba(26,115,232,0.25); }
+        .reveal-btn:hover { background: linear-gradient(135deg, #1557b0, #3367d6); box-shadow: 0 4px 10px rgba(26,115,232,0.35); transform: translateY(-1px); }
+        .reveal-btn:active { transform: translateY(0); }
+        .reveal-btn.is-open { background: linear-gradient(135deg, #5f6368, #80868b); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .reveal-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 4px; color: #856404; font-weight: 600; }
+        .code-block { background: #263238; color: #aed581; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: "Consolas", monospace; font-size: 0.88em; line-height: 1.5; margin: 10px 0; }
+
+        /* 统计标签 */
+        .stat-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-tag { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-size: 0.9em; }
+        .stat-tag .num { font-weight: 700; color: #1a73e8; font-size: 1.2em; }
+
+        /* 折叠按钮 */
+        .collapse-btn { background: #f5f7fa; border: 1px solid #e1e4e8; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85em; color: #666; margin-bottom: 10px; transition: all 0.2s; }
+        .collapse-btn:hover { background: #e8f0fe; color: #1a73e8; }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .sidebar { width: 220px; }
+            .main-wrapper { margin-left: 220px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; position: fixed; top: 145px; left: 0; width: 280px; z-index: 300; box-shadow: 4px 0 12px rgba(0,0,0,0.15); }
+            .sidebar.show { display: block; }
+            .main-wrapper { margin-left: 0; }
+            .menu-btn { display: block; position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #1a73e8; color: white; border: none; border-radius: 50%; font-size: 1.2em; cursor: pointer; z-index: 400; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        }
+        @media (min-width: 769px) { .menu-btn { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <h1>GESP C++三级真题 - 知识点分类汇总</h1>
+    <p>按知识点重新组织 | 点击侧边栏切换 | 覆盖2024.03-2026.06共10套真题</p>
+</div>
+
+<div class="view-toggle">
+    <button onclick="switchView('by-topic')" class="active" id="btn-by-topic">按知识点汇总</button>
+    <button onclick="switchView('by-month')" id="btn-by-month">按月份查看</button>
+</div>
+
+<!-- 移动端菜单按钮 -->
+<button class="menu-btn" onclick="toggleSidebar()">☰</button>
+
+<!-- 侧边栏 -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-title">知识点导航</div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">数据编码与进制转换</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('enc-binary')">二进制/八进制/十六进制 <span class="count">18</span></div>
+            <div class="sidebar-item" onclick="showTopic('enc-complement')">原码/反码/补码 <span class="count">16</span></div>
+            <div class="sidebar-item" onclick="showTopic('enc-convert')">进制转换计算 <span class="count">12</span></div>
+            <div class="sidebar-item" onclick="showTopic('enc-ascii')">ASCII编码 <span class="count">8</span></div>
+            <div class="sidebar-item" onclick="showTopic('enc-utf8')">UTF-8/Base64 <span class="count">3</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">位运算</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('bit-and-or-xor')">按位与/或/异或 <span class="count">14</span></div>
+            <div class="sidebar-item" onclick="showTopic('bit-shift')">移位运算 <span class="count">10</span></div>
+            <div class="sidebar-item" onclick="showTopic('bit-not')">按位取反 <span class="count">6</span></div>
+            <div class="sidebar-item" onclick="showTopic('bit-swap')">异或交换 <span class="count">4</span></div>
+            <div class="sidebar-item" onclick="showTopic('bit-priority')">位运算优先级 <span class="count">5</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">C++基础语法</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('cpp-type')">数据类型与范围 <span class="count">10</span></div>
+            <div class="sidebar-item" onclick="showTopic('cpp-operator')">运算符与表达式 <span class="count">12</span></div>
+            <div class="sidebar-item" onclick="showTopic('cpp-loop')">循环与条件 <span class="count">8</span></div>
+            <div class="sidebar-item" onclick="showTopic('cpp-function')">函数与作用域 <span class="count">7</span></div>
+            <div class="sidebar-item" onclick="showTopic('cpp-variable')">变量与常量 <span class="count">6</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">数组与字符串</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('arr-basic')">数组基础 <span class="count">10</span></div>
+            <div class="sidebar-item" onclick="showTopic('str-string')">string类操作 <span class="count">12</span></div>
+            <div class="sidebar-item" onclick="showTopic('str-char')">字符数组 <span class="count">8</span></div>
+            <div class="sidebar-item" onclick="showTopic('str-process')">字符串处理 <span class="count">9</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">算法与编程题</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('algo-enumerate')">枚举法 <span class="count">8</span></div>
+            <div class="sidebar-item" onclick="showTopic('algo-simulate')">模拟算法 <span class="count">6</span></div>
+            <div class="sidebar-item" onclick="showTopic('algo-math')">数学规律 <span class="count">7</span></div>
+            <div class="sidebar-item" onclick="showTopic('algo-greedy')">贪心策略 <span class="count">3</span></div>
+            <div class="sidebar-item" onclick="showTopic('algo-crypto')">加密/密码 <span class="count">5</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <div class="sidebar-group-title" onclick="toggleGroup(this)">计算机常识</div>
+        <div class="sidebar-items">
+            <div class="sidebar-item" onclick="showTopic('cs-hardware')">硬件与存储 <span class="count">5</span></div>
+            <div class="sidebar-item" onclick="showTopic('cs-os')">操作系统 <span class="count">3</span></div>
+            <div class="sidebar-item" onclick="showTopic('cs-network')">网络基础 <span class="count">2</span></div>
+            <div class="sidebar-item" onclick="showTopic('cs-history')">计算机历史 <span class="count">3</span></div>
+        </div>
+    </div>
+
+    <!-- 月份导航（仅在"按月份查看"模式下显示） -->
+    <div id="month-nav" style="display:none;">
+        <div class="sidebar-title" style="border-bottom-color:#fff3e0; color:#e65100;">月份导航</div>
+        <div class="sidebar-item" onclick="showMonth('m2024-03')">2024年03月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2024-06')">2024年06月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2024-12')">2024年12月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2025-03')">2025年03月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2025-06')">2025年06月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2025-12')">2025年12月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2026-03')">2026年03月 <span class="count">27</span></div>
+        <div class="sidebar-item" onclick="showMonth('m2026-06')">2026年06月 <span class="count">27</span></div>
+    </div>
+</div>
+
+<div class="main-wrapper" id="main-wrapper">
+
+<div id="enc-binary" class="page active">
+<div class="content-card">
+<h2>二进制 / 八进制 / 十六进制</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">18</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">8</span> 个月份</div>
+</div>
+
+<h3>二进制与十进制互转</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">二进制数101.11对应的十进制数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.6.5 B.5.5 C.5.75 D.5.25</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>整数部分：101 = 1×4 + 0×2 + 1 = 5</p>
+        <p>小数部分：.11 = 1×0.5 + 1×0.25 = 0.75</p>
+        <p>总和：5.75。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">二进制数1101.101对应的十进制数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.13.625 B.12.75 C.11.875 D.14.5</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>整数：1101 = 8+4+1 = 13。小数：.101 = 0.5+0.125 = 0.625。总和13.625。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">请将二进制数转换为等值的十进制数()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.14.25 B.13.625 C.13.5 D.14.5</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>推断二进制为1101.101：整数13，小数0.625，共13.625。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>八进制与十进制互转</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">八进制数35.6对应的十进制数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.29.75 B.28.5 C.27.625 D.30.25</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>整数：3×8 + 5 = 29。小数：6/8 = 0.75。总和29.75。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">16进制数B2025转换成8进制数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.2620045 B.2004526 C.729125 D.2420045</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>16进制转8进制：先转二进制，每1位16进制对应4位二进制，再每3位二进制对应1位8进制。</p>
+        <p>B2025(16) = 1011 0010 0000 0010 0101(2)</p>
+        <p>分组(从右往左)：010 110 010 000 000 100 101 = 2 6 2 0 0 4 5。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>十六进制与编码</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">如果16位短整数-2的二进制是"FFFE"，则短整数-4的十六进制是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.FF04 B.FFFA C.FFFC D.FFFH</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>-2的补码：FFFE。补码相加：FFFE + FFFE = 1FFFC，舍弃进位得FFFC。或直接计算-4的补码=反码(FFFB)+1=FFFC。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">已知unsigned char c=0x0F; 执行c=c&lt;&lt;3; c的十进制值是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.64 B.72 C.80 D.120</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>0x0F = 15 = 00001111。左移3位：01111000 = 120。unsigned char不会溢出(8位内)。故选D。</p>
+    </div>
+</div>
+</div>
+
+<h3>字面量表示</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">下面字面量形式的字符码值最大的是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.100 B.075 C.0x70 D.0x60</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>A. 100(十进制)=100；B. 075(八进制)=61；C. 0x70(十六进制)=112；D. 0x60=96。最大为C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">在C++中，(010&lt;&lt;1)执行结果是100。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>010是八进制(以0开头)，等于十进制8。8&lt;&lt;1=16，不是100。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">C++语句cout&lt;&lt;(n%15==0?"YES":"NO");能够判断一个整数能否被3和5同时整除。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>被15整除等价于被3和5同时整除(3和5互质)。正确。</p>
+</div>
+</div>
+
+<h3>相关编程题</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：十进制转八进制</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>核心代码</strong>：除基取余法</p>
+    <div class="code-block">while(decimal&gt;0){
+    oct_number[i++] = decimal % 8;
+    decimal /= 8;
+}</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>每次取decimal%8存入数组，然后decimal/=8。最后逆序输出。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：十进制转十六进制</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>核心</strong>：使用hex格式控制符</p>
+    <div class="code-block">cout &lt;&lt; hex &lt;&lt; decimal;</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>oct(八进制)、hex(十六进制)、dec(十进制)可切换输出格式。</p>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="enc-complement" class="page">
+<div class="content-card">
+<h2>原码 / 反码 / 补码</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">16</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">7</span> 个月份</div>
+</div>
+
+<h3>补码计算与表示</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">整数-5的16位补码表示是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.1005 B.1006 C.FFFA D.FFFB</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>5的原码：0000 0000 0000 0101 → 取反：1111...1010 → 加1：1111...1011 = FFFB。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">8位二进制下，十进制数-15的补码是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.11110000 B.10001111 C.10010000 D.11110001</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>15的原码：00001111 → 取反：11110000 → 加1：11110001。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">补码10111011对应的真值是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.-69 B.-59 C.-68 D.-58</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>10111011是补码，符号位1表示负数。取反01000100+1=01000101=69。真值为-69。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">二进制数10110101是8位补码，该数十进制是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.-73 B.-75 C.-77 D.75</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>10110101取反：01001010，加1：01001011=75。真值-75。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">若X的8位补码为00001010，则X/2的补码是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.00000101 B.10000101 C.00000101或10000101 D.算术右移后结果取决于符号位</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>X=10(00001010)。X/2=5。正数右移补0，得00000101。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>补码运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">补码11111101进行运算&gt;&gt;1以后得到的结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.11111100 B.-2 C.11111101 D.11111010</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>11111101是补码，表示-3。算术右移补符号位1，得11111110，即-2的补码。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">补码加法中，若符号位无进位而次高位有进位，则说明()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.结果正确 B.发生上溢 C.发生下溢 D.结果符号位错误</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>双符号位判断溢出：符号位无进位、次高位有进位，表示正溢出(上溢)。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>原码与反码</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">8位二进制原码能表示的最小整数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.-127 B.-128 C.-255 D.-256</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>8位原码范围：-(2^7-1) ~ +(2^7-1) = -127 ~ 127。最小为-127。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">反码表示中，零的表示形式有()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.1种 B.2种 C.8种 D.16种</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>反码中：+0=00000000，-0=11111111。有两种零的表示。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">二进制[10000011]原和补对应的十进制分别是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.-125,-3 B.-3,-125 C.-3,-3 D.-125,-125</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>原码10000011：符号位1，数值3 → -3。补码10000011：取反01111100+1=01111101=125 → -125。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>补码快速计算技巧</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">计算-a的补码技巧：从右往左扫描，遇第一个1后左边全取反。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>这是补码求法的快速技巧，正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">-11的补码的一种计算方式是从右往左扫描正数的二进制形式，遇到第一个1之后，左边的所有位都取反。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>正确。这是补码求法的标准快速技巧。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">在8位二进制原码表示中，八进制数-5的二进制形式是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.10000101 B.11111010 C.11111011 D.00000101</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>八进制-5即十进制-5。8位原码：符号位1，数值5=0000101，合起来10000101。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>补码范围判断</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">一个n位的二进制数补码，最大的表示范围是从-2^n到+(2^n-1)。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>n位补码范围是[-2^(n-1), 2^(n-1)-1]。不是2^n。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">8位有符号整数(补码)的范围是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.-128到127 B.-127到128 C.-256到255 D.0到255</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>8位补码：-2^7 ~ 2^7-1 = -128 ~ 127。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">64位系统中int还是32位，数据范围是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：C. -2^31 ~ (2^31)-1</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>32位有符号int范围：-2147483648 ~ 2147483647，即-2^31 ~ 2^31-1。故选C。</p>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="bit-and-or-xor" class="page">
+<div class="content-card">
+<h2>按位与 / 按位或 / 按位异或</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">14</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">8</span> 个月份</div>
+</div>
+
+<h3>按位或运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">下面C++代码执行后的输出是( )。cout &lt;&lt; (3|16)</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.3 B.16 C.19 D.48</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>3=00011, 16=10000，3|16=10011=19。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">定义int a=3, b=16，则a|b的值和a+b的关系是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.大于 B.等于 C.小于 D.等于或小于</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>3|16=19，3+16=19。当两个数二进制位无重叠1时，a|b=a+b。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">a|10运算的结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.使a的二进制从右往左第二位为1 B.使第一位为0 C.使第二位为0 D.使最高位为0</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>10=1010(二进制)，即第2位(2^1)和第4位(2^3)为1。a|10会将这些位置1。从右往左第二位会被置1。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">二进制数1010|1100的结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.1000 B.1110 C.1010 D.1100</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>1010|1100=1110(有1则为1)。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>按位与运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">下面逻辑运算中，正确的是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.5&&3==0 B.5|3==8 C.5||3==11 D.5&3==0001</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>5&3=101&011=001=1，0001(八进制)=1。1==1为真。D正确。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">a&b|(c^d)，a=3,b=7,c=15,d=4，结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.十进制11 B.二进制11 C.八进制11 D.十六进制11</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>优先级：& > ^ > |。先算c^d=15^4=11，再算a&b=3&7=3，最后3|11=11(十进制)。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>按位异或运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">a,b是整型变量，互不相同初始值。程序实现了什么效果。a=a^b;b=a^b;a=a^b;</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.值始终未改变 B.值互换 C.互换后又还原 D.无意义</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>异或交换经典算法：a^b^b=a，a^b^a=b。最终a,b互换。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">以下哪个位运算可以交换两个变量的值(无需临时变量)()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项A：a=a^b;b=a^b;a=a^b;</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>异或交换是唯一正确的位运算交换方式。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">以下代码的说法正确的是()。cout&lt;&lt;(a^b)</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.整体异或 B.按位同或 C.按位与 D.按位异或</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>^是按位异或运算符。故选D。</p>
+    </div>
+</div>
+</div>
+
+<h3>综合位运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">a=7,b=3,c=14,d=15,e=8，!a&lt;&lt;b&c^d|e的结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.0 B.15 C.7 D.14</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>优先级：! > &lt;&lt; > & > ^ > |</p>
+        <p>!a=!7=0; 0&lt;&lt;3=0; 0&14=0; 0^15=15; 15|8=15。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">若表达式((a|3)==3)的值为true，则说明a在0到3之间。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>(a|3)==3意味着a的二进制位只能在低2位有1，即a&(~3)=0，a取值为0,1,2,3。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">(x&1)==0可以判断整数x是否为偶数。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>最低位为0则偶数，为1则奇数。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">如果a为int类型，且((a&1)==1)的值为true，则说明a是奇数。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>最低位为1则奇数。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">如果a为int类型，且a的二进制最低位为0，则((a&3&1)==0)的值为true。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>a最低位为0，a&1=0，所以a&3&1=0，等于0为true。正确。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="bit-shift" class="page">
+<div class="content-card">
+<h2>移位运算</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">10</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">6</span> 个月份</div>
+</div>
+
+<h3>左移运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">对整型变量int a=3，执行a&lt;&lt;2将把2输出到a中。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>a&lt;&lt;2是左移2位，相当于a*4=12，不是把2输出到a中。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">一个int类型变量a，执行(a&lt;&lt;2&gt;&gt;2)后的值一定是a。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>若a的低位两位不为0，左移2位会舍弃低位，再右移2位补0，无法恢复原来的低位。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">定义整数int x=-5，则执行cout &lt;&lt; (x == (x&lt;&lt;1&gt;&gt;1)) 输出是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.0 B.1 C.-5 D.5</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>x=-5，补码左移1位得-10，算术右移1位(补符号位1)恢复为-5。对于此特定值，x == (x&lt;&lt;1&gt;&gt;1)为真，输出1。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>右移运算</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">int a=12; int result=a&gt;&gt;2; 输出是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.12 B.6 C.3 D.1</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>12=1100，右移2位得0011=3。相当于12/4=3。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">补码11111101进行运算&gt;&gt;1以后得到的结果是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.11111100 B.-2 C.11111101 D.11111010</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>11111101是-3的补码。算术右移补符号位1，得11111110，即-2的补码。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">若X的8位补码为00001010，则X/2的补码是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.00000101 B.10000101 C.00000101或10000101 D.算术右移后结果取决于符号位</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>X=10(正数)，右移1位补0，得00000101=5。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>移位与类型转换</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">unsigned char c=0x0F; c=c&lt;&lt;3; c的十进制值是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.64 B.72 C.80 D.120</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>0x0F=15=00001111，左移3位得01111000=120。unsigned char不会溢出。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">x是浮点数，(x>>1)等价于x/2。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>移位运算符不能用于浮点数，编译错误。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">将二进制位整体左移n位，高位溢出舍弃，低位补0；等价于num乘以2^n。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>仅在无溢出时等价。若左移后超出数据类型范围，结果不等于乘法。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">若num左移导致高位溢出(如超过整型范围)，结果符合乘法规律。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>左移溢出后高位被舍弃，结果不符合乘法规律。例如int最大值左移1位会溢出成负数。错误。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="arr-basic" class="page">
+<div class="content-card">
+<h2>数组基础</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">10</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">7</span> 个月份</div>
+</div>
+
+<h3>数组定义与初始化</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">定义int arr[5]={1,2,3};，则arr[3]的值为0，arr[5]是合法下标。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>arr[3]确实自动初始化为0，但arr[5]越界(合法0~4)。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">double arr[10];未初始化时所有元素默认值为0。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>局部数组不初始化时值不确定(垃圾值)。只有全局/静态数组才默认初始化为0。错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">int arr[]={1,2,3}; sizeof(arr)的结果为12(int占4字节)。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>3个int * 4字节 = 12字节。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">如何正确定义一个长度为5的整型数组()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.int array=new int[5]; B.array int[5]; C.int[]array={1,2,3,4,5}; D.int array[5];</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>A是Java语法；B语法错误；C是Java/C#语法；D是C/C++标准数组定义。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">关于标准C++一维数组的描述，哪项是错误的()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：C.数组的长度只能在运行时才能确定</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>C++标准数组长度必须是编译期常量。运行时确定长度需用动态分配(new/vector)。故选C。</p>
+    </div>
+</div>
+</div>
+
+<h3>数组越界与访问</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">int a[10]={1,2,3,4,5,6,7,8,9,10}; for(int i=0;i&lt;=10;i++) sum+=a[i];</span>
+    <div class="q-meta">
+        <span class="q-source">2024.09</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项涉及数组越界。循环条件i&lt;=10导致访问a[10]，越界。结果不确定。故选D。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">代码中存在几处错误()。for(int i=0;i&lt;=SIZE;i++) arr[i]=i*2;</span>
+    <div class="q-meta">
+        <span class="q-source">2025.09</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.0 B.1 C.2 D.3</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>错误1：i&lt;=SIZE导致访问arr[5]越界(应为i&lt;SIZE)。错误2：输出arr[SIZE]也是越界。共2处错误。故选C。</p>
+    </div>
+</div>
+</div>
+
+<h3>数组遍历与操作</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">代码执行后数组arr的内容是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <pre>int arr[6]={1,2,3,4,5,6};
+for(int i=0;i&lt;6;i+=2){
+    arr[i]=arr[i]+arr[i+1];
+    arr[i+1]=arr[i]-arr[i+1];
+    arr[i]=arr[i]-arr[i+1];
+}</pre>
+    <p>选项：A.{2,1,4,3,6,5}</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>加减法交换：a=a+b; b=a-b; a=a-b; 每对元素互换。结果{2,1,4,3,6,5}。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">int arr[4]={1,2,3}; arr[3]=arr[0]+arr[2]; 数组内容是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.09</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.{1,2,3,3} B.{1,2,3,4} C.{1,2,3,5} D.{1,2,3,6}</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>arr[0]=1, arr[2]=3, arr[3]=1+3=4。数组为{1,2,3,4}。故选B。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">在C++中，数组名不能改变，数组名不能被赋值。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>数组名是常量指针(地址)，不能作为左值被赋值。正确。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="str-string" class="page">
+<div class="content-card">
+<h2>string类操作</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">12</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">8</span> 个月份</div>
+</div>
+
+<h3>字符串长度与大小</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">定义char str[20]={'G','E','S','P'};，则str的字符串长度为()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.4 B.5 C.19 D.20</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>字符列表初始化只提供4个字符，后面自动补'\0'。strlen遇到第一个'\0'结束，长度为4。sizeof(str)=20。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">如果字符串定义为char str[]="GESP";，则字符数组str的长度为()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.0 B.4 C.5 D.6</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>"GESP"含4个可见字符+1个'\0'，数组总长度5。strlen=4，sizeof=5。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">string s="GESP考试"; s占据的字节数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.10 B.8 C.8或10 D.取决于计算机采用什么编码</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>GBK编码下中文2字节，UTF-8下3字节。字节数取决于编码。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">字符串"Gesp考试"，字符数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.10 B.8 C.6 D.取决于编码</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>字符数(逻辑字符)：G,e,s,p,考,试 共6个。字节数取决于编码，但字符数是6。故选C。</p>
+    </div>
+</div>
+</div>
+
+<h3>字符串查找与截取</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">执行下面C++代码后，输出的第一个数是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <pre>string str="gEsP is Interesting"; int x=str.find("s");
+cout &lt;&lt; x &lt;&lt; endl;</pre>
+    <p>选项涉及find查找位置。</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>find("s")查找小写s，在"gEsP is Interesting"中，第一个s出现在"is"中，位置为5(0-based)。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">string str="GESP2026"; string sub=str.substr(4,2); sub的值是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.20 B.02 C.2026 D.026</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>str="GESP2026"，索引：G(0)E(1)S(2)P(3)2(4)0(5)2(6)6(7)。substr(4,2)从4开始取2个字符："20"。故选A。</p>
+    </div>
+</div>
+</div>
+
+<h3>字符串替换与修改</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">string s="1234@@chenadai"; string str="12345"; s.replace(1,5,str); 输出是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：A.12345 B.2345@ C.112345chenadai D.12345chenadai</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>replace(1,5,str)：从位置1开始替换5个字符(2,3,4,@,@)为"12345"。结果：1 + 12345 + chenadai = "112345chenadai"。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">能得到HelloC++的是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：B</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项B：str.replace(5,5,"C++"); (原串"HelloWorld")</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>从位置5开始替换5个字符"World"为"C++"，得"HelloC++"。故选B。</p>
+    </div>
+</div>
+</div>
+
+<h3>字符串比较与判断</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">C++中string的==运算符比较的是字符串的内存地址，而非内容。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>string类重载了==运算符，比较的是字符串内容。C风格字符串(char*)用==才比较地址。故错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">string("hello")=="hello"的比较结果为true。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>string类重载了==，支持与const char*比较内容。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">string的substr(2,10)在字符串长度不足时会抛出异常。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.06</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>C++的substr在长度不足时，只取到字符串末尾，不会抛出异常(除非pos越界)。故错误。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">strcmp(str1,str2)返回0表示str1大于str2，返回正数表示两者相等。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.12</span>
+        <span class="q-answer wrong">答案：×</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>strcmp返回0表示相等，正数表示str1>str2，负数表示str1&lt;str2。说反了。错误。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="algo-enumerate" class="page">
+<div class="content-card">
+<h2>枚举法</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">8</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">6</span> 个月份</div>
+</div>
+
+<h3>枚举法基础</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">下面C++代码可以计算1到100的累加和，采用的是穷举法。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="q-body">
+    <pre>for(int i=1;i&lt;=100;i++) sum += i;</pre>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>逐个遍历1到100并累加，属于穷举/枚举法。正确。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">最不适合用枚举法解决的是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项：C.计算1+2+3+...+1000的和</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>等差数列求和可用公式n*(n+1)/2=500500，用枚举法效率低且没有必要。其他选项(找倍数、质数、数字组合)都适合枚举。故选C。</p>
+    </div>
+</div>
+</div>
+
+<h3>枚举法应用</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">枚举法查找最大值索引，横线应填入()。</span>
+    <div class="q-meta">
+        <span class="q-source">2025.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <pre>int arr[]={3,7,2,9,5}; int maxIndex=0;
+for(int i=1;i&lt;5;i++) ________________ { maxIndex=i; }</pre>
+    <p>选项D：if(arr[i]&gt;arr[maxIndex])</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>当arr[i]大于当前最大值时更新索引。故选D。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">找出1到35中能被7整除的数字，横线应填入()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <pre>if(i%7==0) ____________;</pre>
+    <p>选项A：arr[count++]=i;</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>将满足条件的i存入arr数组，并用count记录个数。A正确。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">用枚举法解决鸡兔同笼问题，最合理的枚举逻辑是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：A</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项A：枚举鸡的数量x(0~35)，兔的数量y=35-x，判断2*x+4*y==94</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>A只枚举一个变量，利用约束条件y=35-x，效率最高。故选A。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">求小于等于N的素数，体现"将所有从2到本身减1都除一遍"的是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.12</span>
+        <span class="q-answer">答案：C</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项C：先输出2，然后从3到N，每个i被2到i-1除，若都不能整除则输出。</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>C正确：先输出2，再枚举奇数，内层j从2到i-1验证素数。故选C。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">判断某个数是否是质数，枚举范围可适当缩小(遍历到sqrt(n)而非n)。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>若n有大于sqrt(n)的因子，则必对应小于sqrt(n)的因子。只需枚举到sqrt(n)。正确。</p>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">把整数3025从中剪开分为30和25，两数之和平方等于原数，这样的数叫"雷劈数"，可用枚举求所有四位数。</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+        <span class="q-answer">答案：√</span>
+    </div>
+</div>
+<div class="analysis">
+    <p>枚举所有四位数(1000-9999)，剪开位置可在中间两位之间，验证(a+b)^2==n即可。算法可行。正确。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="algo-crypto" class="page">
+<div class="content-card">
+<h2>加密 / 密码 / 字符转换</h2>
+<div class="stat-bar">
+    <div class="stat-tag">共 <span class="num">5</span> 题</div>
+    <div class="stat-tag">覆盖 <span class="num">5</span> 个月份</div>
+</div>
+
+<h3>凯撒密码与移位</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：移位</span>
+    <div class="q-meta">
+        <span class="q-source">2024.06</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>题意</strong>：给定偏移量n，输出大写字母表循环移位后的结果。</p>
+    <div class="code-block">for(int i=0;i&lt;26;i++){
+    int j=(i+n)%26;
+    char ch='A'+j;
+    cout&lt;&lt;ch;
+}</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>利用取模运算实现循环移位，(i+n)%26保证在0~25范围内。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：凯撒密码</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>题意</strong>：已知明文和密文，求偏移量，再解密另一段密文。</p>
+    <div class="code-block">int d=s1[0]-s2[0];
+d=(d%26+26)%26;
+for(int i=0;i&lt;s3.length();i++){
+    int ch=(s3[i]-'A'+d)%26;
+    cout&lt;&lt;(char)(ch+'A');
+}</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>偏移量d = 明文[0] - 密文[0]，需调整为正数。对每个密文字符逆向偏移。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">字符串加密：每个字符ASCII+3，超过z从a开始，正确条件是()。</span>
+    <div class="q-meta">
+        <span class="q-source">2026.03</span>
+        <span class="q-answer">答案：D</span>
+    </div>
+</div>
+<div class="q-body">
+    <p>选项D：if(str[i]+3>'z') str[i]='a'+(str[i]+3-'z')-1;</p>
+    <div class="analysis">
+        <div class="analysis-title">解析</div>
+        <p>当str[i]+3>'z'时，需要循环回绕。新字符='a'+(str[i]+3-'z'-1)。例如'z'+3=125，新字符='a'+2='c'。D正确。</p>
+    </div>
+</div>
+</div>
+
+<h3>字符转换</h3>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：字符转换</span>
+    <div class="q-meta">
+        <span class="q-source">2026.06</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>题意</strong>：大写转小写，小写转大写，数字变*。</p>
+    <div class="code-block">if('a'&lt;=c && c&lt;='z') cout&lt;&lt;(char)(c-32);
+else if('A'&lt;=c && c&lt;='Z') cout&lt;&lt;(char)(c+32);
+else cout&lt;&lt;'*';</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>大小写ASCII差32。也可用toupper/tolower函数。</p>
+    </div>
+</div>
+</div>
+
+<div class="question">
+<div class="q-header">
+    <span class="q-title">编程题：字母求和</span>
+    <div class="q-meta">
+        <span class="q-source">2024.03</span>
+    </div>
+</div>
+<div class="q-body">
+    <p><strong>题意</strong>：小写字母代表字母表位置(a=1)，大写字母代表ASCII相反数(A=-65)。求字符串对应的整数和。</p>
+    <div class="code-block">if(str[i]&gt;='a' && str[i]&lt;='z') ans += str[i]-'a'+1;
+else if(str[i]&gt;='A' && str[i]&lt;='Z') ans -= str[i];</div>
+    <div class="analysis">
+        <div class="analysis-title">要点</div>
+        <p>注意大写字母是减去其ASCII值(即加相反数)。</p>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="enc-convert" class="page">
+<div class="content-card">
+<h2>进制转换计算</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"二进制/八进制/十六进制"和"原码/反码/补码"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="enc-ascii" class="page">
+<div class="content-card">
+<h2>ASCII编码</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在相关字符串和编码分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="enc-utf8" class="page">
+<div class="content-card">
+<h2>UTF-8/Base64</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目较少，主要涉及编码规则判断。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="bit-not" class="page">
+<div class="content-card">
+<h2>按位取反</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"原码/反码/补码"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="bit-swap" class="page">
+<div class="content-card">
+<h2>异或交换</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"按位与/或/异或"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="bit-priority" class="page">
+<div class="content-card">
+<h2>位运算优先级</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已分散在各位运算分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cpp-type" class="page">
+<div class="content-card">
+<h2>数据类型与范围</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"原码/反码/补码"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cpp-operator" class="page">
+<div class="content-card">
+<h2>运算符与表达式</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已分散在各分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cpp-loop" class="page">
+<div class="content-card">
+<h2>循环与条件</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已分散在各分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cpp-function" class="page">
+<div class="content-card">
+<h2>函数与作用域</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已分散在各分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cpp-variable" class="page">
+<div class="content-card">
+<h2>变量与常量</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已分散在各分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="str-char" class="page">
+<div class="content-card">
+<h2>字符数组</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"数组基础"和"string类操作"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="str-process" class="page">
+<div class="content-card">
+<h2>字符串处理</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"string类操作"和"加密/密码"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="algo-simulate" class="page">
+<div class="content-card">
+<h2>模拟算法</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"加密/密码"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="algo-math" class="page">
+<div class="content-card">
+<h2>数学规律</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在"枚举法"分类中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="algo-greedy" class="page">
+<div class="content-card">
+<h2>贪心策略</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目已包含在编程题解析中。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cs-hardware" class="page">
+<div class="content-card">
+<h2>硬件与存储</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目较少，涉及存储单位换算。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cs-os" class="page">
+<div class="content-card">
+<h2>操作系统</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目较少，如鸿蒙系统判断。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cs-network" class="page">
+<div class="content-card">
+<h2>网络基础</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目较少。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="cs-history" class="page">
+<div class="content-card">
+<h2>计算机历史</h2>
+<div class="stat-bar">
+    <div class="stat-tag">相关题目已分散在其他分类中</div>
+</div>
+<p style="color:#666; padding: 20px;">该分类题目较少，如王选奖。</p>
+<p style="color:#666; padding: 20px;">请查看侧边栏其他相关分类，或切换到"按月份查看"模式浏览全部题目。</p>
+</div>
+</div>
+
+<div id="m2024-03" class="page">
+<div class="content-card">
+<h2>2024年03月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>补码计算（-5的16位补码）</li>
+    <li>十六进制运算（FFFE相关）</li>
+    <li>按位或运算（3|16=19）</li>
+    <li>移位运算与恢复（x&lt;&lt;1&gt;&gt;1）</li>
+    <li>字符ASCII累加（string遍历）</li>
+    <li>数组条件筛选（%2和%3）</li>
+    <li>字符串大小写转换</li>
+    <li>字符串词数统计</li>
+    <li>字面量进制判断（100 vs 075 vs 0x70）</li>
+    <li>相邻元素和模3统计</li>
+    <li>字符数组长度（sizeof vs strlen）</li>
+    <li>按位或与加法关系</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">字母求和</span></div>
+<div class="q-body">
+    <p>小写=字母表位置，大写=ASCII相反数。遍历求和。</p>
+</div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">完全平方数</span></div>
+<div class="q-body">
+    <p>枚举所有数对，判断和是否为完全平方数。sqrt取整验证。</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="m2024-06" class="page">
+<div class="content-card">
+<h2>2024年06月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>GESP认证语言种类（3种）</li>
+    <li>闰年判断条件</li>
+    <li>32位int数据范围</li>
+    <li>十进制转八进制（除基取余）</li>
+    <li>二进制小数转十进制（101.11=5.75）</li>
+    <li>流程图嵌套循环分析</li>
+    <li>右移运算（a&gt;&gt;2）</li>
+    <li>异或交换变量</li>
+    <li>字符串长度（含'\0'）</li>
+    <li>数组最大值查找</li>
+    <li>数组元素筛选（7的倍数）</li>
+    <li>字符ASCII累加</li>
+    <li>条件统计（身高&gt;135）</li>
+    <li>转义字符输出</li>
+    <li>字符串分割（substr）</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">移位</span></div>
+<div class="q-body"><p>大写字母表循环移位，(i+n)%26。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">寻找倍数</span></div>
+<div class="q-body"><p>判断max元素是否能被所有数整除。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2024-12" class="page">
+<div class="content-card">
+<h2>2024年12月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>原码与补码真值转换（10000011）</li>
+    <li>编码概念辨析（反码符号位不变）</li>
+    <li>十六进制转八进制（B2025）</li>
+    <li>十进制小数转二进制（625.625）</li>
+    <li>位运算优先级与逻辑</li>
+    <li>补码右移（11111101&gt;&gt;1）</li>
+    <li>string替换（replace）</li>
+    <li>按位或置位（a|10）</li>
+    <li>字符串结束符判断</li>
+    <li>sizeof vs strlen</li>
+    <li>tolower函数</li>
+    <li>数字出现次数统计</li>
+    <li>百元百鸡问题</li>
+    <li>素数枚举方法</li>
+    <li>金链问题（二进制思想）</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">数字替换</span></div>
+<div class="q-body"><p>大于k替换为max，小于k替换为min。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">打印数字</span></div>
+<div class="q-body"><p>0/1/2/3的5行网格图案输出。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2025-03" class="page">
+<div class="content-card">
+<h2>2025年03月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>Base64编码长度计算</li>
+    <li>UTF-8合法性判断</li>
+    <li>8位原码表示（八进制-5）</li>
+    <li>十进制小数转二进制（111.111）</li>
+    <li>补码的作用（简化加减法）</li>
+    <li>8位有符号整数范围</li>
+    <li>unsigned int转换（-5变4294967291）</li>
+    <li>oct/hex格式控制</li>
+    <li>按位异或（a^b）</li>
+    <li>枚举法找最大值索引</li>
+    <li>双指针分割奇偶数</li>
+    <li>string替换（replace）</li>
+    <li>substr截取</li>
+    <li>美丽数字判断（9的倍数非8的倍数）</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">按位与或</span></div>
+<div class="q-body"><p>利用性质a+b=(a&b)+(a|b)，直接得i=2025-x。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">词频统计</span></div>
+<div class="q-body"><p>map统计，tolower转小写，找最大值。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2025-06" class="page">
+<div class="content-card">
+<h2>2025年06月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>8位原码最小整数（-127）</li>
+    <li>反码零的表示（2种）</li>
+    <li>补码真值转换（10111011=-69）</li>
+    <li>补码除法（右移）</li>
+    <li>二进制小数转十进制（1101.101=13.625）</li>
+    <li>补码溢出判断</li>
+    <li>八进制转十进制（35.6=29.75）</li>
+    <li>按位或（1010|1100）</li>
+    <li>异或交换变量</li>
+    <li>数组定义（int array[5]）</li>
+    <li>枚举法（三位数各位平方）</li>
+    <li>小球反弹模拟</li>
+    <li>字符串字节数（编码相关）</li>
+    <li>字符数vs字节数</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">奇偶校验</span></div>
+<div class="q-body"><p>统计所有数二进制1的个数，判断奇偶。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">分糖果</span></div>
+<div class="q-body"><p>贪心：a[i]=max(a[i], a[i-1]+1)，保证递增且满足最低要求。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2025-12" class="page">
+<div class="content-card">
+<h2>2025年12月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>二进制小数转十进制</li>
+    <li>数组长度编译期确定</li>
+    <li>continue与循环</li>
+    <li>移位与条件（3>>2=0）</li>
+    <li>位运算与长度（s.length()|3）</li>
+    <li>指针与数组（p+2）</li>
+    <li>min函数参数</li>
+    <li>unsigned int范围（2字节）</li>
+    <li>数组元素交换（加减法）</li>
+    <li>复合位运算优先级</li>
+    <li>后置递减（x--）</li>
+    <li>流程图条件判断</li>
+    <li>switch与位运算</li>
+    <li>abs函数</li>
+    <li>toupper与索引</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">密码强度</span></div>
+<div class="q-body"><p>判断长度>=8、有大写字母、有数字。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">智慧购物</span></div>
+<div class="q-body"><p>每种文具选最便宜的，数组记录min_price。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2026-03" class="page">
+<div class="content-card">
+<h2>2026年03月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>字符转整数（'1'=49）</li>
+    <li>异或交换变量</li>
+    <li>字符数组差异（'\0'）</li>
+    <li>未定义行为（x+++ ++x）</li>
+    <li>补码计算（-15）</li>
+    <li>三进制转十进制</li>
+    <li>补码求真值（10110101）</li>
+    <li>unsigned char左移</li>
+    <li>按位取反（~0=-1）</li>
+    <li>substr截取</li>
+    <li>sizeof数组元素个数</li>
+    <li>sizeof vs strlen</li>
+    <li>枚举法适用场景</li>
+    <li>鸡兔同笼枚举</li>
+    <li>字符串加密条件</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">二进制回文串</span></div>
+<div class="q-body"><p>转二进制数组，双指针判断回文。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">凯撒密码</span></div>
+<div class="q-body"><p>求偏移量，逆向解密。</p></div>
+</div>
+</div>
+</div>
+
+<div id="m2026-06" class="page">
+<div class="content-card">
+<h2>2026年06月 真题回顾</h2>
+<div class="stat-bar">
+    <div class="stat-tag">单选题 <span class="num">15</span></div>
+    <div class="stat-tag">判断题 <span class="num">10</span></div>
+    <div class="stat-tag">编程题 <span class="num">2</span></div>
+</div>
+
+<h3>核心考点</h3>
+<ul style="margin-left: 20px; color: #555;">
+    <li>机器数的多义性（10001101）</li>
+    <li>硬盘容量换算（1TB=931GB）</li>
+    <li>高低位压缩（0x1,0x2→0x12）</li>
+    <li>反码范围（[-2^(n-1)-1, 2^(n-1)-1]）</li>
+    <li>位运算加密（'G'|6等）</li>
+    <li>位运算说法辨析</li>
+    <li>字符串与字符数组安全</li>
+    <li>2KB等于多少bit</li>
+    <li>按位取反公式（~n=-n-1）</li>
+    <li>补码范围（[-2^(n-1), 2^(n-1)-1]）</li>
+    <li>位运算优先级综合</li>
+    <li>string成员函数（empty）</li>
+    <li>数组定义语法（int b['&']）</li>
+    <li>进制判断程序</li>
+</ul>
+
+<h3>编程题</h3>
+<div class="question">
+<div class="q-header"><span class="q-title">加密</span></div>
+<div class="q-body"><p>按密码本替换数字，keys[a[i]]。</p></div>
+</div>
+<div class="question">
+<div class="q-header"><span class="q-title">字符转换</span></div>
+<div class="q-body"><p>大写转小写，小写转大写，数字变*。</p></div>
+</div>
+</div>
+</div>
+
+</div>
+
+<footer style="text-align: center; padding: 30px; color: #666; font-size: 0.9em; margin-left: 260px;">
+    <p>GESP C++三级真题解析汇总 | 数据来源：CCF编程能力等级认证历年真题</p>
+    <p>按知识点重新组织 | 点击侧边栏切换分类 | 支持月份/知识点双视图</p>
+</footer>
+
+<script>
+// 当前视图模式
+let currentView = 'by-topic';
+
+function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-toggle button').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('btn-' + view).classList.add('active');
+
+    var sidebar = document.getElementById('sidebar');
+    var mainWrapper = document.getElementById('main-wrapper');
+    var footer = document.querySelector('footer');
+    var topicGroups = sidebar.querySelectorAll('.sidebar-group');
+    var monthNav = document.getElementById('month-nav');
+
+    if (view === 'by-topic') {
+        sidebar.style.display = '';
+        mainWrapper.classList.remove('full-width');
+        footer.style.marginLeft = '260px';
+        // 显示知识点分组，隐藏月份导航
+        topicGroups.forEach(function(g) { g.style.display = ''; });
+        monthNav.style.display = 'none';
+        showTopic('enc-binary');
+    } else {
+        sidebar.style.display = '';
+        mainWrapper.classList.remove('full-width');
+        footer.style.marginLeft = '260px';
+        // 隐藏知识点分组，显示月份导航
+        topicGroups.forEach(function(g) { g.style.display = 'none'; });
+        monthNav.style.display = 'block';
+        showMonth('m2024-03');
+    }
+}
+
+function showTopic(topicId) {
+    if (currentView !== 'by-topic') return;
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.sidebar-item').forEach(function(b) { b.classList.remove('active'); });
+
+    var target = document.getElementById(topicId);
+    if (target) target.classList.add('active');
+
+    // 修复选择器：正确转义单引号以匹配 onclick 属性
+    var btn = document.querySelector(".sidebar-item[onclick=\"showTopic('" + topicId + "')\"]");
+    if (btn) btn.classList.add('active');
+
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function showMonth(monthId) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+
+    // 清除月份导航的 active 状态
+    var monthNav = document.getElementById('month-nav');
+    monthNav.querySelectorAll('.sidebar-item').forEach(function(b) { b.classList.remove('active'); });
+
+    var target = document.getElementById(monthId);
+    if (target) target.classList.add('active');
+
+    // 设置月份导航 active 状态
+    var btn = monthNav.querySelector(".sidebar-item[onclick=\"showMonth('" + monthId + "')\"]");
+    if (btn) btn.classList.add('active');
+
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function toggleGroup(title) {
+    var group = title.parentElement;
+    group.classList.toggle('collapsed');
+}
+
+function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+}
+
+// 初始化显示第一个知识点
+document.addEventListener('DOMContentLoaded', function() {
+    showTopic('enc-binary');
+
+    // 为每道题目注入"查看答案/解析"按钮
+    var eyeOpen = '<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+    var eyeClosed = '<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>';
+
+    document.querySelectorAll('.question').forEach(function(q) {
+        var btn = document.createElement('button');
+        btn.className = 'reveal-btn';
+        btn.innerHTML = eyeOpen + ' 查看答案与解析';
+        btn.addEventListener('click', function() {
+            var isRevealed = q.classList.toggle('revealed');
+            if (isRevealed) {
+                btn.innerHTML = eyeClosed + ' 收起答案与解析';
+                btn.classList.add('is-open');
+            } else {
+                btn.innerHTML = eyeOpen + ' 查看答案与解析';
+                btn.classList.remove('is-open');
+            }
+        });
+        q.appendChild(btn);
+    });
+});
+</script>
+
+</body>
+</html>
